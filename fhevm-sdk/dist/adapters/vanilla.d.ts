@@ -1,0 +1,20 @@
+/**
+ * Vanilla JS Adapter - Universal FHEVM SDK
+ * Clean, simple vanilla JavaScript utilities using your working implementation
+ */
+/**
+ * Simple Vanilla JS FHEVM manager
+ */
+export declare class FhevmVanilla {
+    private instance;
+    private isReady;
+    initialize(): Promise<void>;
+    encrypt(contractAddress: string, userAddress: string, value: number): Promise<{
+        encryptedData: any;
+        proof: any;
+    }>;
+    decrypt(handle: string, contractAddress: string, signer: any): Promise<number>;
+    publicDecrypt(handle: string): Promise<number>;
+    getInstance(): any;
+    getStatus(): "idle" | "ready";
+}
