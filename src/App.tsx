@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
 import { initializeFheInstance } from './lib/fhevm';
 import FheCounter from './components/FheCounter';
+import ConfidentialNewsletter from './components/ConfidentialNewsletter';
 import './App.css';
 
 // Contract configuration
 const CONTRACT_ADDRESSES = {
-  31337: '0x40e8Aa088739445BC3a3727A724F56508899f65B', // Local Hardhat
-  11155111: '0x09bd35Ec9F76c3b2Aed624753A6236f11ef020C0', // Sepolia - Updated for 0.9.1
+  31337: '', // Local Hardhat
+  11155111: 'TODO??', // Sepolia - Updated for 0.9.1
 }
 
 // Sepolia network configuration
@@ -395,7 +396,7 @@ function App() {
             )}
           </div>
 
-          <FheCounter 
+          <ConfidentialNewsletter 
               account={account}
               chainId={chainId}
               isConnected={isConnected}

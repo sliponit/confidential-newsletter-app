@@ -2,13 +2,13 @@
 
 import { useState } from 'react';
 import { ethers } from 'ethers';
-import { decryptValue, createEncryptedInput } from '../lib/fhevm';
+import { requestUserDecryption, createEncryptedInput } from '../lib/fhevm';
 
 
 // Contract configuration
 const CONTRACT_ADDRESSES = {
   31337: '0x40e8Aa088739445BC3a3727A724F56508899f65B', // Local Hardhat
-  11155111: '0x4538E909fd9d63Db5FEB5994e7357f0Aab4e01C7', // Sepolia - Updated for 0.9.1
+  11155111: '0x510799909bDD4d1936e68e3b4c6ea716e112536b', // Sepolia - Updated for 0.9.1
 }
 
 const CONTRACT_ABI = [
@@ -288,7 +288,7 @@ const CONTRACT_ABI = [
     "name": "getContentKey",
     "outputs": [
       {
-        "internalType": "bytes32",
+        "internalType": "euint256",
         "name": "",
         "type": "bytes32"
       }
@@ -485,7 +485,7 @@ interface ConfidentialNewsletterProps {
 
 export default function ConfidentialNewsletter({ account, chainId, isConnected, isInitialized, onMessage }: ConfidentialNewsletterProps) {
   const [contentKeyHandle, setContentKeyHandle] = useState<string>('');
-  const [decryptedContentKey, setDecryptedContentKey] = useState<number | null>(null);
+  const [decryptedContentKey, setDecryptedContentKey] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [isEncrypting, setIsEncrypting] = useState(false);
@@ -543,8 +543,9 @@ export default function ConfidentialNewsletter({ account, chainId, isConnected, 
       const signer = await provider.getSigner();
       
       // Use decryptValue from fhevmInstance
-      const result = await decryptValue(contentKeyHandle, contractAddress, signer);
-      setDecryptedContentKey(result);
+      const decryptedKey = await requestUserDecryption(contractAddress, signer, contentKeyHandle);
+      const keyHex = "0x" + decryptedKey.toString(16).padStart(64, "0");
+      setDecryptedContentKey(keyHex);
       onMessage('EIP-712 decryption completed!');
       setTimeout(() => onMessage(''), 3000);
     } catch (error: any) {
@@ -752,8 +753,8 @@ export default function ConfidentialNewsletter({ account, chainId, isConnected, 
           {decryptedContentKey !== null && (
             <div className="mt-4 info-card border-green-500/30 bg-green-500/5">
               <div className="flex justify-between items-center">
-                <span className="text-gray-400 text-sm font-medium">Decrypted Count</span>
-                <span className="text-[#FFEB3B] text-3xl font-bold">{decryptedContentKey}</span>
+                <span className="text-gray-400 text-sm font-medium">Decrypted Content Key</span>
+                <span className="code-text text-[#FFEB3B] text-xs">{decryptedContentKey}</span>
               </div>
             </div>
           )}
