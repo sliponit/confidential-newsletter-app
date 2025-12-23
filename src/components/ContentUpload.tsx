@@ -5,12 +5,11 @@ import { ethers } from 'ethers';
 import { requestUserDecryption } from '../lib/fhevm';
 import { encryptContent } from '../lib/crypto';
 import { uploadToPinata } from '../lib/pinata';
+import { CONTRACT_ADDRESSES } from '../lib/contract';
+
+const REACT_APP_BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:3000"
 
 // Contract configuration (same as ConfidentialNewsletter)
-const CONTRACT_ADDRESSES: Record<number, string> = {
-  31337: '0x40e8Aa088739445BC3a3727A724F56508899f65B', // Local Hardhat
-  11155111: '0x510799909bDD4d1936e68e3b4c6ea716e112536b', // Sepolia
-};
 
 const CONTRACT_ABI = [
   {
@@ -158,7 +157,7 @@ export default function ContentUpload({
         pinataJwt
       );
 
-      const link = `http://localhost:3000/content/${result.cid}`;
+      const link = `${REACT_APP_BASE_URL}/content/${result.cid}`;
       setUploadResult({ cid: result.cid, link });
       onMessage('Upload successful!');
       setTimeout(() => onMessage(''), 3000);

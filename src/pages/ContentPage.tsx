@@ -299,7 +299,7 @@ export default function ContentPage({
                 <p className="text-gray-400 mb-4">
                   Connect your wallet to access this content
                 </p>
-                <button onClick={onConnect} className="btn-primary">
+                <button onClick={onConnect} className="btn-primary w-full">
                   Connect Wallet
                 </button>
               </div>
@@ -371,7 +371,7 @@ export default function ContentPage({
                   <button
                     onClick={handleSubscribe}
                     disabled={isSubscribing || !subscriptionPrice}
-                    className="btn-primary"
+                    className="btn-primary w-full"
                   >
                     {isSubscribing ? (
                       <>
