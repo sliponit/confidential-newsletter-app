@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { initializeFheInstance } from './lib/fhevm';
-import FheCounter from './components/FheCounter';
 import ConfidentialNewsletter from './components/ConfidentialNewsletter';
+import ContentUpload from './components/ContentUpload';
 import './App.css';
 
 // Contract configuration
@@ -396,7 +396,7 @@ function App() {
             )}
           </div>
 
-          <ConfidentialNewsletter 
+          <ConfidentialNewsletter
               account={account}
               chainId={chainId}
               isConnected={isConnected}
@@ -404,6 +404,16 @@ function App() {
               onMessage={setMessage}
             />
           </div>
+
+          {isConnected && isInitialized && (
+            <ContentUpload
+              account={account}
+              chainId={chainId}
+              isConnected={isConnected}
+              isInitialized={isInitialized}
+              onMessage={setMessage}
+            />
+          )}
       </main>
     </div>
   );
