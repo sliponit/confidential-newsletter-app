@@ -4,12 +4,8 @@ import { initializeFheInstance } from './lib/fhevm';
 import HomePage from './pages/HomePage';
 import ContentPage from './pages/ContentPage';
 import './App.css';
+import { CONTRACT_ADDRESSES } from './lib/contract';
 
-// Contract configuration
-const CONTRACT_ADDRESSES = {
-  31337: '', // Local Hardhat
-  11155111: 'TODO??', // Sepolia - Updated for 0.9.1
-}
 
 // Sepolia network configuration
 const SEPOLIA_CONFIG = {
@@ -179,8 +175,8 @@ function App() {
                 </svg>
               </div>
               <div>
-                <h1 className="text-black text-3xl font-bold tracking-tight">Universal FHEVM SDK</h1>
-                <p className="text-black/70 text-sm font-medium mt-1">React Showcase</p>
+                <h1 className="text-black text-3xl font-bold tracking-tight">Confidential Newsletter</h1>
+                <p className="text-black/70 text-sm font-medium mt-1">Encypted content with an AES key for which ACL is handled with FHEVM</p>
               </div>
             </div>
             <div className="flex items-center gap-3">
