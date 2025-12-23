@@ -364,7 +364,7 @@ export default function ContentPage({
 
                   {subscriptionPrice && (
                     <p className="text-[#FFEB3B] font-bold text-lg mb-4">
-                      {ethers.formatEther(subscriptionPrice)} ETH
+                      {ethers.formatEther(subscriptionPrice)} ETH / month
                     </p>
                   )}
 

@@ -38,7 +38,7 @@ contract ConfidentialNewsletterLock is ZamaEthereumConfig, Ownable, ReentrancyGu
     /// @notice Flag to check if content key has been set
     bool public contentKeySet;
 
-    /// @notice Mapping of subscriber address to their subscription expiration timestamp // TODO?? exists
+    /// @notice Mapping of subscriber address to their subscription expiration timestamp
     mapping(address => uint256) public expirationTimestamps;
 
     /// @notice Total revenue collected

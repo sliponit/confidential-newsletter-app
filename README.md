@@ -5,6 +5,7 @@ A privacy-preserving newsletter paywall powered by Zama's Fully Homomorphic Encr
 **Live Demo**: https://confidential-newsletter-app.vercel.app
 **Contract (Sepolia)**: [0x510799909bDD4d1936e68e3b4c6ea716e112536b](https://sepolia.etherscan.io/address/0x510799909bDD4d1936e68e3b4c6ea716e112536b#code)
 **Example Content**: https://confidential-newsletter-app.vercel.app/content/QmUPP2A4XP293tBR1niDon2PE4jNvSfHKgMPTumsScJAtT
+**Example Post on paragraph**: https://paragraph.com/@confidentialnewsletter/benefits-of-regular-exercise
 
 ---
 
@@ -18,6 +19,27 @@ Traditional newsletter paywalls manage access credentials centrally, exposing su
 4. **Encrypting content** (AES-256-GCM) before storing on IPFS
 
 This approach draws inspiration from [Unlock Protocol](https://unlock-protocol.com/) but replaces traditional access tokens with FHE-based cryptographic access control.
+
+---
+
+## Why FHE?
+
+Traditional newsletter paywalls face fundamental trust issues:
+
+| Traditional Approach | FHE Approach |
+|---------------------|--------------|
+| Credentials stored in centralized database | Encryption key stored on-chain as `euint256` |
+| Server decrypts content for subscribers | Subscribers decrypt locally after ACL-gated key retrieval |
+| Single point of failure/breach | No trusted server; blockchain is the source of truth |
+| Provider can read all content | Publisher encrypts once; even the contract can't read the key |
+
+**How Zama FHE solves this:**
+- The AES content key is FHE-encrypted before storage, remaining encrypted even on-chain
+- Only addresses with ACL permissions (granted via `FHE.allow()`) can request decryption
+- Decryption uses Zama's threshold MPC network—no single party holds the full key
+- EIP-712 signatures prove subscriber intent without exposing private keys
+
+The result: a paywall where neither the publisher's server nor any blockchain node can access subscriber content without proper authorization.
 
 ---
 
@@ -122,7 +144,7 @@ When a user visits `/content/:cid`:
 
 ## Design Flaw (Acknowledged)
 
-Since subscribers receive ACL access to decrypt the content key, they can technically decrypt **all newsletter editions** without the contract validating `isValid` from subscription details at content-fetch time. The current implementation relies on good faith.
+Since subscribers receive ACL access to decrypt the content key, they can technically store it and decrypt **all newsletter editions** without the contract validating `isValid` - computed with expiration timestamp - from subscription details at content-fetch time. The current implementation relies on good faith.
 
 **Mitigation approaches for future versions**:
 - Store unique IVs per edition in the contract
