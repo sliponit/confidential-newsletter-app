@@ -1,14 +1,12 @@
 import React, { useState } from 'react';
 import { initializeFheInstance } from './lib/fhevm';
 import FheCounter from './components/FheCounter';
-import FheRatings from './components/FheRatings';
-import FheVoting from './components/FheVoting';
 import './App.css';
 
 // Contract configuration
 const CONTRACT_ADDRESSES = {
   31337: '0x40e8Aa088739445BC3a3727A724F56508899f65B', // Local Hardhat
-  11155111: '0x7A14b454D19A4CB4c55E0386d04Eb0B66e6717EC', // Sepolia - Updated for 0.9.1
+  11155111: '0x09bd35Ec9F76c3b2Aed624753A6236f11ef020C0', // Sepolia - Updated for 0.9.1
 }
 
 // Sepolia network configuration
@@ -397,28 +395,7 @@ function App() {
             )}
           </div>
 
-          {isConnected && isInitialized && (
-            <FheVoting 
-              account={account}
-              chainId={chainId}
-              isConnected={isConnected}
-              isInitialized={isInitialized}
-              onMessage={setMessage}
-            />
-          )}
-          </div>
-
-        {isConnected && isInitialized && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <FheCounter 
-              account={account}
-              chainId={chainId}
-              isConnected={isConnected}
-              isInitialized={isInitialized}
-              onMessage={setMessage}
-            />
-
-            <FheRatings 
+          <FheCounter 
               account={account}
               chainId={chainId}
               isConnected={isConnected}
@@ -426,7 +403,6 @@ function App() {
               onMessage={setMessage}
             />
           </div>
-        )}
       </main>
     </div>
   );

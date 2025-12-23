@@ -28,10 +28,23 @@ async function main() {
   const votingAddress = await simpleVoting.getAddress();
   console.log(`SimpleVoting_uint32 contract deployed to: ${votingAddress}`);
   
+  // Deploy ConfidentialNewsletterLock contract
+  console.log("Deploying ConfidentialNewsletterLock contract...");
+  const ConfidentialNewsletterLock = await hre.ethers.getContractFactory("ConfidentialNewsletterLock");
+  const newsletterLock = await ConfidentialNewsletterLock.deploy(
+    "My Newsletter",                    // name
+    ethers.parseEther("0.001"),         // subscriptionPrice (0.001 ETH)
+    30 * 24 * 60 * 60                   // subscriptionDuration (30 days in seconds)
+  );
+  await newsletterLock.waitForDeployment();
+  const newsletterAddress = await newsletterLock.getAddress();
+  console.log(`ConfidentialNewsletterLock contract deployed to: ${newsletterAddress}`);
+
   console.log("\n=== Deployment Summary ===");
   console.log(`FHECounter: ${counterAddress}`);
   console.log(`ReviewCardsFHE: ${reviewCardsAddress}`);
   console.log(`SimpleVoting_uint32: ${votingAddress}`);
+  console.log(`ConfidentialNewsletterLock: ${newsletterAddress}`);
 }
 
 // Export the main function for hardhat-deploy

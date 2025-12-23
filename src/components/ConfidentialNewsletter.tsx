@@ -8,40 +8,474 @@ import { decryptValue, createEncryptedInput } from '../lib/fhevm';
 // Contract configuration
 const CONTRACT_ADDRESSES = {
   31337: '0x40e8Aa088739445BC3a3727A724F56508899f65B', // Local Hardhat
-  11155111: '0x09bd35Ec9F76c3b2Aed624753A6236f11ef020C0', // Sepolia - Updated for 0.9.1
+  11155111: '0x4538E909fd9d63Db5FEB5994e7357f0Aab4e01C7', // Sepolia - Updated for 0.9.1
 }
 
 const CONTRACT_ABI = [
   {
-    inputs: [],
-    name: "getCount",
-    outputs: [{ internalType: "euint32", name: "", type: "bytes32" }],
-    stateMutability: "view",
-    type: "function",
+    "inputs": [
+      {
+        "internalType": "string",
+        "name": "_name",
+        "type": "string"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_subscriptionPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_subscriptionDuration",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "nonpayable",
+    "type": "constructor"
   },
   {
-    inputs: [
-      { internalType: "externalEuint32", name: "inputEuint32", type: "bytes32" },
-      { internalType: "bytes", name: "inputProof", type: "bytes" },
-    ],
-    name: "increment",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "inputs": [],
+    "name": "ContentKeyAlreadySet",
+    "type": "error"
   },
   {
-    inputs: [
-      { internalType: "externalEuint32", name: "inputEuint32", type: "bytes32" },
-      { internalType: "bytes", name: "inputProof", type: "bytes" },
-    ],
-    name: "decrement",
-    outputs: [],
-    stateMutability: "nonpayable",
-    type: "function",
+    "inputs": [],
+    "name": "ContentKeyNotSet",
+    "type": "error"
   },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "required",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "provided",
+        "type": "uint256"
+      }
+    ],
+    "name": "InsufficientPayment",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidDuration",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "InvalidPrice",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoFundsToWithdraw",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "NoValidSubscription",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableInvalidOwner",
+    "type": "error"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "account",
+        "type": "address"
+      }
+    ],
+    "name": "OwnableUnauthorizedAccount",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ReentrancyGuardReentrantCall",
+    "type": "error"
+  },
+  {
+    "inputs": [],
+    "name": "ZamaProtocolUnsupported",
+    "type": "error"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "setter",
+        "type": "address"
+      }
+    ],
+    "name": "ContentKeySet",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "owner",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "amount",
+        "type": "uint256"
+      }
+    ],
+    "name": "FundsWithdrawn",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "subscriber",
+        "type": "address"
+      }
+    ],
+    "name": "KeyAccessGranted",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "previousOwner",
+        "type": "address"
+      },
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "OwnershipTransferred",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "price",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "duration",
+        "type": "uint256"
+      }
+    ],
+    "name": "SubscriptionParamsUpdated",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "subscriber",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "expirationTimestamp",
+        "type": "uint256"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "pricePaid",
+        "type": "uint256"
+      }
+    ],
+    "name": "SubscriptionPurchased",
+    "type": "event"
+  },
+  {
+    "anonymous": false,
+    "inputs": [
+      {
+        "indexed": true,
+        "internalType": "address",
+        "name": "subscriber",
+        "type": "address"
+      },
+      {
+        "indexed": false,
+        "internalType": "uint256",
+        "name": "newExpirationTimestamp",
+        "type": "uint256"
+      }
+    ],
+    "name": "SubscriptionRenewed",
+    "type": "event"
+  },
+  {
+    "inputs": [],
+    "name": "confidentialProtocolId",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "contentKeySet",
+    "outputs": [
+      {
+        "internalType": "bool",
+        "name": "",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "name": "expirationTimestamps",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "getContentKey",
+    "outputs": [
+      {
+        "internalType": "bytes32",
+        "name": "",
+        "type": "bytes32"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_subscriber",
+        "type": "address"
+      }
+    ],
+    "name": "getSubscriptionDetails",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "expirationTimestamp",
+        "type": "uint256"
+      },
+      {
+        "internalType": "bool",
+        "name": "isValid",
+        "type": "bool"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "_subscriber",
+        "type": "address"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_duration",
+        "type": "uint256"
+      }
+    ],
+    "name": "grantSubscription",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "name",
+    "outputs": [
+      {
+        "internalType": "string",
+        "name": "",
+        "type": "string"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "owner",
+    "outputs": [
+      {
+        "internalType": "address",
+        "name": "",
+        "type": "address"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "renounceOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "externalEuint256",
+        "name": "_encryptedKey",
+        "type": "bytes32"
+      },
+      {
+        "internalType": "bytes",
+        "name": "_inputProof",
+        "type": "bytes"
+      }
+    ],
+    "name": "setContentKey",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscribe",
+    "outputs": [],
+    "stateMutability": "payable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscriptionDuration",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "subscriptionPrice",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "totalRevenue",
+    "outputs": [
+      {
+        "internalType": "uint256",
+        "name": "",
+        "type": "uint256"
+      }
+    ],
+    "stateMutability": "view",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "address",
+        "name": "newOwner",
+        "type": "address"
+      }
+    ],
+    "name": "transferOwnership",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [
+      {
+        "internalType": "uint256",
+        "name": "_newPrice",
+        "type": "uint256"
+      },
+      {
+        "internalType": "uint256",
+        "name": "_newDuration",
+        "type": "uint256"
+      }
+    ],
+    "name": "updateSubscriptionParams",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  },
+  {
+    "inputs": [],
+    "name": "withdraw",
+    "outputs": [],
+    "stateMutability": "nonpayable",
+    "type": "function"
+  }
 ]
 
-interface FheCounterProps {
+interface ConfidentialNewsletterProps {
   account: string;
   chainId: number;
   isConnected: boolean;
@@ -49,9 +483,9 @@ interface FheCounterProps {
   onMessage: (message: string) => void;
 }
 
-export default function FheCounter({ account, chainId, isConnected, isInitialized, onMessage }: FheCounterProps) {
-  const [countHandle, setCountHandle] = useState<string>('');
-  const [decryptedCount, setDecryptedCount] = useState<number | null>(null);
+export default function ConfidentialNewsletter({ account, chainId, isConnected, isInitialized, onMessage }: ConfidentialNewsletterProps) {
+  const [contentKeyHandle, setContentKeyHandle] = useState<string>('');
+  const [decryptedContentKey, setDecryptedContentKey] = useState<number | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDecrypting, setIsDecrypting] = useState(false);
   const [isEncrypting, setIsEncrypting] = useState(false);
@@ -61,26 +495,43 @@ export default function FheCounter({ account, chainId, isConnected, isInitialize
   const contractAddress = CONTRACT_ADDRESSES[chainId as keyof typeof CONTRACT_ADDRESSES] || 'Not supported chain';
 
   // Get encrypted count from contract
-  const getCount = async () => {
+  const getContentKey = async () => {
     if (!isConnected || !contractAddress || !window.ethereum || contractAddress === 'Not supported chain') return;
-    
+
     try {
       onMessage('Reading contract...');
       const provider = new ethers.BrowserProvider(window.ethereum);
-      const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, provider);
-      const result = await contract.getCount();
-      setCountHandle(result);
+      const signer = await provider.getSigner();
+      const contract = new ethers.Contract(contractAddress, CONTRACT_ABI, signer);
+
+      // First check subscription status or if user is owner
+      const [owner, [, isValid]] = await Promise.all([
+        contract.owner(),
+        contract.getSubscriptionDetails(account)
+      ]);
+      const isOwner = owner.toLowerCase() === account.toLowerCase();
+      if (!isValid && !isOwner) {
+        onMessage('No valid subscription. Please subscribe first.');
+        return;
+      }
+
+      const result = await contract.getContentKey();
+      setContentKeyHandle(result);
       onMessage('Contract read successfully!');
       setTimeout(() => onMessage(''), 3000);
-    } catch (error) {
-      console.error('Get count failed:', error);
-      onMessage('Failed to get count');
+    } catch (error: any) {
+      console.error('Get content key failed:', error);
+      if (error?.reason?.includes('NoValidSubscription') || error?.message?.includes('NoValidSubscription')) {
+        onMessage('Error. No valid subscription. Please subscribe first.');
+      } else {
+        onMessage('Failed to get content key');
+      }
     }
   };
 
   // Decrypt count using fhevmInstance directly
   const handleDecrypt = async () => {
-    if (!countHandle || !window.ethereum || !contractAddress || contractAddress === 'Not supported chain') return;
+    if (!contentKeyHandle || !window.ethereum || !contractAddress || contractAddress === 'Not supported chain') return;
     
     try {
       setIsDecrypting(true);
@@ -92,8 +543,8 @@ export default function FheCounter({ account, chainId, isConnected, isInitialize
       const signer = await provider.getSigner();
       
       // Use decryptValue from fhevmInstance
-      const result = await decryptValue(countHandle, contractAddress, signer);
-      setDecryptedCount(result);
+      const result = await decryptValue(contentKeyHandle, contractAddress, signer);
+      setDecryptedContentKey(result);
       onMessage('EIP-712 decryption completed!');
       setTimeout(() => onMessage(''), 3000);
     } catch (error: any) {
@@ -255,23 +706,23 @@ export default function FheCounter({ account, chainId, isConnected, isInitialize
           <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
         </svg>
         <div>
-          <h2 className="text-2xl font-bold text-white">FHEVM Counter Demo</h2>
+          <h2 className="text-2xl font-bold text-white">Confidential Newsletter</h2>
           <p className="text-gray-400 text-sm">Using REAL FHEVM SDK on Sepolia testnet</p>
         </div>
       </div>
 
       <div className="space-y-6">
         <div>
-          <button onClick={getCount} className="btn-primary w-full">
+          <button onClick={getContentKey} className="btn-primary w-full">
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
             </svg>
-            Get Count
+            Get Content Key
           </button>
-          {countHandle && (
+          {contentKeyHandle && (
             <div className="mt-4 info-card border-[#FFEB3B]/30">
               <span className="text-gray-400 text-xs font-medium block mb-2">Encrypted Handle</span>
-              <span className="code-text text-[#FFEB3B] text-xs">{countHandle}</span>
+              <span className="code-text text-[#FFEB3B] text-xs">{contentKeyHandle}</span>
             </div>
           )}
         </div>
@@ -281,7 +732,7 @@ export default function FheCounter({ account, chainId, isConnected, isInitialize
         <div>
           <button
             onClick={handleDecrypt}
-            disabled={!countHandle || isDecrypting}
+            disabled={!contentKeyHandle || isDecrypting}
             className="btn-secondary w-full"
             title={decryptError || undefined}
           >
@@ -298,11 +749,11 @@ export default function FheCounter({ account, chainId, isConnected, isInitialize
             )}
             {isDecrypting ? 'Decrypting...' : 'Decrypt Count'}
           </button>
-          {decryptedCount !== null && (
+          {decryptedContentKey !== null && (
             <div className="mt-4 info-card border-green-500/30 bg-green-500/5">
               <div className="flex justify-between items-center">
                 <span className="text-gray-400 text-sm font-medium">Decrypted Count</span>
-                <span className="text-[#FFEB3B] text-3xl font-bold">{decryptedCount}</span>
+                <span className="text-[#FFEB3B] text-3xl font-bold">{decryptedContentKey}</span>
               </div>
             </div>
           )}

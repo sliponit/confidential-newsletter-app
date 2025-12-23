@@ -18,7 +18,7 @@ export async function initializeFheInstance() {
     // Check for both uppercase and lowercase versions of RelayerSDK
     let sdk = window.RelayerSDK || window.relayerSDK;
     if (!sdk) {
-        throw new Error('RelayerSDK not loaded. Please include the script tag in your HTML:\n<script src="https://cdn.zama.org/relayer-sdk-js/0.3.0-5/relayer-sdk-js.umd.cjs"></script>');
+        throw new Error('RelayerSDK not loaded. Please include the script tag in your HTML:\n<script src="https://cdn.zama.org/relayer-sdk-js/0.3.0-8/relayer-sdk-js.umd.cjs"></script>');
     }
     
     const { initSDK, createInstance, SepoliaConfig } = sdk;

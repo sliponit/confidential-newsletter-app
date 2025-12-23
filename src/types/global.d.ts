@@ -16,7 +16,7 @@ declare global {
 }
 
 // CDN module declaration for FHEVM SDK
-declare module 'https://cdn.zama.org/relayer-sdk-js/0.3.0-5/relayer-sdk-js.umd.cjs' {
+declare module 'https://cdn.zama.org/relayer-sdk-js/0.3.0-8/relayer-sdk-js.umd.cjs' {
   export function initSDK(): Promise<void>;
   export function createInstance(config: any): Promise<any>;
   export const SepoliaConfig: any;
